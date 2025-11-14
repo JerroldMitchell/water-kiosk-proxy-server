@@ -33,7 +33,16 @@ ALLOWED_COLLECTIONS = ['customers']
 
 app = Flask(__name__)
 
-@app.route('/', methods=['GET'])
+# Add CORS headers to all responses
+@app.after_request
+def add_cors_headers(response):
+    """Add CORS headers to allow browser requests from any origin"""
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PATCH, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    return response
+
+@app.route('/', methods=['GET', 'OPTIONS'])
 def status():
     """Status page"""
     return jsonify({
@@ -51,9 +60,13 @@ def status():
         }
     })
 
-@app.route('/v1/databases/<database_id>/collections/<collection_id>/documents', methods=['GET', 'POST'])
+@app.route('/v1/databases/<database_id>/collections/<collection_id>/documents', methods=['GET', 'POST', 'OPTIONS'])
 def handle_documents(database_id, collection_id):
     """Handle GET (list) and POST (create) requests to documents"""
+
+    # Handle CORS preflight requests
+    if request.method == 'OPTIONS':
+        return '', 200
 
     # Validate collection
     if collection_id not in ALLOWED_COLLECTIONS:
@@ -115,9 +128,13 @@ def handle_documents(database_id, collection_id):
         logger.error(f'Error: {str(e)}')
         return jsonify({'error': str(e)}), 500
 
-@app.route('/v1/databases/<database_id>/collections/<collection_id>/documents/<document_id>', methods=['GET', 'PATCH', 'DELETE'])
+@app.route('/v1/databases/<database_id>/collections/<collection_id>/documents/<document_id>', methods=['GET', 'PATCH', 'DELETE', 'OPTIONS'])
 def handle_document(database_id, collection_id, document_id):
     """Handle GET (retrieve), PATCH (update), and DELETE (remove) requests for specific documents"""
+
+    # Handle CORS preflight requests
+    if request.method == 'OPTIONS':
+        return '', 200
 
     # Validate collection
     if collection_id not in ALLOWED_COLLECTIONS:
