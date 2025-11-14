@@ -16,7 +16,7 @@ from datetime import datetime
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
@@ -94,6 +94,7 @@ def handle_documents(database_id, collection_id):
         }
 
         logger.info(f'{method} {appwrite_url}')
+        logger.debug(f'Query parameters received: {dict(request.args)}')
 
         if method == 'GET':
             # Handle GET request (list documents)
