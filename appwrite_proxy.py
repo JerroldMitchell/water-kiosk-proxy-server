@@ -39,7 +39,7 @@ def add_cors_headers(response):
     """Add CORS headers to allow browser requests from any origin"""
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PATCH, DELETE, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, ngrok-skip-browser-warning'
     return response
 
 @app.route('/', methods=['GET', 'OPTIONS'])
