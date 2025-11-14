@@ -82,9 +82,25 @@ def handle_documents(database_id, collection_id):
         # Build Appwrite URL
         appwrite_url = f'{APPWRITE_ENDPOINT}/databases/{database_id}/collections/{collection_id}/documents'
 
-        # Add query parameters if present
+        # Convert limit/offset parameters to Appwrite's queries syntax
+        # Appwrite REST API requires: ?queries[]=limit(100)&queries[]=offset(25)
+        # Not: ?limit=100&offset=25
         if request.args:
-            appwrite_url += '?' + urllib.parse.urlencode(request.args)
+            queries = []
+            if 'limit' in request.args:
+                limit_val = request.args.get('limit')
+                queries.append(f'queries[]=limit({limit_val})')
+            if 'offset' in request.args:
+                offset_val = request.args.get('offset')
+                queries.append(f'queries[]=offset({offset_val})')
+
+            # Add any other parameters that aren't limit/offset
+            for key, value in request.args.items():
+                if key not in ['limit', 'offset']:
+                    queries.append(f'{key}={urllib.parse.quote(str(value))}')
+
+            if queries:
+                appwrite_url += '?' + '&'.join(queries)
 
         # Prepare headers with API key
         headers = {
